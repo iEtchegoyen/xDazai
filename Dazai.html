@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>† Layse • Fading Light †</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,500;0,700;1,400;1,600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@200;300;400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+
+    <style>
+        /* kiri */
+        :root {
+             
+            --custom-cursor-url: url('https://i.ibb.co/27N2CzyS/imagen-2025-09-14-171104235.png');
+                        
+            --custom-bg-url: url('https://i.ibb.co/xK4s0x9n/graphy.png');
+            
+            --accent-red: #881337;
+            --blood-red: #991b1b;
+            --blood-glow: rgba(153, 27, 27, 0.65);
+            --deep-bg: #030303;
+        }
+
+         
+        html, body, *, a, button {
+            cursor: var(--custom-cursor-url), auto !important;
+        }
+
+        
+        ::selection {
+            background-color: #991b1b;
+            color: #000000;
+        }
+
+        
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-garamond { font-family: 'Cormorant Garamond', serif; }
+        .font-script { font-family: 'Great Vibes', cursive; }
+        .font-gothic { font-family: 'UnifrakturMaguntia', cursive; }
+        .font-typewriter { font-family: 'Courier Prime', monospace; }
+        .font-sans-custom { font-family: 'Montserrat', sans-serif; }
+
+        /* texto detras de render */
+        .watermark-huge {
+            font-family: 'UnifrakturMaguntia', cursive;
+            letter-spacing: 0.08em;
+            color: rgba(127, 29, 29, 0.08);
+            text-shadow: 0 0 90px rgba(153, 27, 27, 0.35);
+        }
+
+        /* textura emo */
+        .emo-grunge {
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
+                radial-gradient(rgba(153, 27, 27, 0.04) 1px, transparent 0);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+
+        /* lineas */
+        .emo-scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 15%, 
+                rgba(0, 0, 0, 0.5) 18%
+            );
+            background-size: 100% 3px;
+        }
+
+        /* anim1 */
+        @keyframes flickerDark {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 0.95;
+                text-shadow: 0 0 18px rgba(185, 28, 28, 0.85), 0 0 40px rgba(127, 29, 29, 0.55);
+            }
+            20%, 24%, 55% {
+                opacity: 0.45;
+                text-shadow: none;
+            }
+        }
+        .blood-flicker {
+            animation: flickerDark 5.5s infinite;
+        }
+
+        /* anim2 */
+        @keyframes slowPulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(1.03); }
+        }
+        .heart-glow {
+            animation: slowPulseGlow 6s ease-in-out infinite;
+        }
+
+        /* barcode */
+        .barcode-lines {
+            background: repeating-linear-gradient(
+                90deg,
+                #525252 0px,
+                #525252 1px,
+                transparent 1px,
+                transparent 3px,
+                #7f1d1d 3px,
+                #7f1d1d 5px,
+                transparent 5px,
+                transparent 6px
+            );
+        }
+
+        /* puntitos */
+        .bg-dot-grid {
+            background-image: radial-gradient(#525252 1px, transparent 1px);
+            background-size: 6px 6px;
+        }
+
+        /* img no drag */
+        .no-drag {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+        }
+
+        /* anim3 */
+        .hidden-modal {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .visible-modal {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* srcroll */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7f1d1d;
+        }
+    </style>
+</head>
+<body class="bg-[#030303] text-neutral-300 w-screen h-screen overflow-hidden select-none relative font-sans-custom flex flex-col justify-between">
+
+    <!-- nolo toques, son las particulas de luz -->
+    <canvas id="lightCanvas" class="fixed inset-0 z-10 pointer-events-none"></canvas>
+
+    <!-- menos esto -->
+    <div class="fixed inset-0 z-40 emo-scanlines pointer-events-none opacity-40"></div>
+    <div class="fixed inset-0 z-1 emo-grunge pointer-events-none"></div>
+
+    <!-- capa de fondo -->
+    <div class="fixed inset-0 z-0 bg-[#030303]" style="background-image: var(--custom-bg-url); background-size: cover; background-position: center;">
+        <!-- Resplandor Carmesí Profundo con Latido -->
+        <div class="absolute inset-0 heart-glow bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-950/55 via-neutral-950/90 to-black"></div>
+        <!-- viñetas -->
+        <div class="absolute inset-0 shadow-[inset_0_0_180px_rgba(0,0,0,1)]"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/90"></div>
+    </div>
+
+    <!-- ornamentas -->
+    <div class="fixed top-6 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center space-y-1 opacity-75">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 md:w-24 h-[1px] bg-gradient-to-r from-transparent to-neutral-700"></div>
+            <span class="text-red-800 text-sm">⸸</span>
+            <div class="w-12 md:w-24 h-[1px] bg-gradient-to-l from-transparent to-neutral-700"></div>
+        </div>
+        <span class="font-typewriter text-[9px] tracking-[0.45em] text-neutral-600 uppercase">
+            no light left inside
+        </span>
+    </div>
+
+    <!-- texto de fondo -->
+    <div class="fixed inset-0 z-1 flex items-center justify-center pointer-events-none overflow-hidden">
+        <h1 class="watermark-huge text-[30vw] lowercase select-none leading-none transform -translate-y-4">
+            dazai
+        </h1>
+    </div>
+
+    <!-- render de dazai puedes cambiarlo si quieres esto sólo el link -->
+    <div class="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <!-- Reemplaza el src con la URL de tu render transparente -->
+        <img id="characterRender" 
+             src="https://i.ibb.co/fGzGHYX6/dazai1.png" 
+             alt="Character Render" 
+             class="h-full max-h-[92vh] w-auto object-contain filter contrast-125 brightness-90 drop-shadow-[0_0_50px_rgba(153,27,27,0.5)] no-drag opacity-90 transition-opacity duration-700"
+             oncontextmenu="return false;"
+             ondragstart="return false;">
+    </div>
+
+    <!-- ================= DECOS NO TOQUESSSS ================= -->
+
+    <!-- ESQUINA SUPERIOR IZQUIERDA TOA EMO -->
+    <div class="fixed top-8 left-6 md:left-8 z-20 pointer-events-none flex flex-col space-y-2.5">
+        <div class="flex items-center space-x-2">
+            <span class="text-red-800 text-xs">†</span>
+            <div class="grid grid-cols-3 gap-1 opacity-50">
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+                <span class="w-1 h-1 bg-neutral-500 rounded-full"></span>
+            </div>
+            <div class="w-14 h-[1px] bg-neutral-800"></div>
+            <div class="w-3 h-[1px] bg-red-800"></div>
+        </div>
+
+        <!-- ETIQUETA -->
+        <div class="flex flex-col space-y-1.5">
+            <span class="border border-neutral-800/90 bg-black/80 text-[10px] tracking-[0.35em] font-calibri px-2.5 py-1 text-neutral-400 uppercase w-fit">
+                dead inside // mortem
+            </span>
+            <span class="text-[9px] font-typewriter tracking-[0.25em] text-neutral-600 pl-1 uppercase">
+                [status: lost inside me]
+            </span>
+        </div>
+        <div class="w-12 h-[1px] bg-red-900/80"></div>
+    </div>
+
+    <!-- ESQUINA SUPERIOR DERECHA: FRASE 2 -->
+    <div class="fixed top-8 right-6 md:right-8 z-20 pointer-events-none text-right">
+        <p class="font-typewriter text-sm md:text-base text-neutral-500 tracking-wider">
+            "drowning in the silence
+        </p>
+        <p class="font-typewriter text-sm md:text-base text-neutral-400 tracking-wider flex items-center justify-end space-x-2">
+            <span>of my own mind"</span>
+            <span class="text-red-800 text-xs ml-1">†</span>
+        </p>
+        <div class="w-20 h-[1px] bg-gradient-to-l from-red-800 to-transparent ml-auto mt-1.5"></div>
+        <p class="font-typewriter text-[9px] tracking-[0.25em] text-neutral-600 mt-1 uppercase">
+            ありのままの感情
+        </p>
+    </div>
+
+    <!-- COSTADO IZQUIERDO MEDIO: VERSO MELANCÓLICO VERTICAL -->
+    <div class="fixed top-1/2 left-6 md:left-8 transform -translate-y-1/2 z-20 pointer-events-none hidden sm:flex flex-col items-start space-y-3 opacity-70">
+        <div class="w-[1px] h-12 bg-gradient-to-b from-transparent via-neutral-700 to-red-900"></div>
+        <p class="font-typewriter text-[10px] tracking-[0.3em] text-neutral-500 uppercase [writing-mode:vertical-rl] rotate-180">
+            broken halos &amp; heavy hearts
+        </p>
+        <span class="text-red-800 text-xs">⸸</span>
+    </div>
+
+    <!-- COSTADO DERECHO: BOTÓN INTERACTIVO ("layse chan") PARA ABRIR VENTANA EMERGENTE -->
+    <div class="fixed top-1/3 right-6 md:right-10 z-30 flex flex-col items-end space-y-2.5">
+        <button onclick="openModal()" class="group relative border border-neutral-800 hover:border-red-800 bg-black/90 hover:bg-red-950/30 backdrop-blur-md px-4 py-2 transition-all duration-300 shadow-[0_0_25px_rgba(0,0,0,1)] hover:shadow-[0_0_25px_rgba(153,27,27,0.6)] flex items-center space-x-2.5">
+            <!-- Pequeñas marcas en esquinas del botón -->
+            <span class="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-red-800"></span>
+            <span class="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-red-800"></span>
+
+            <span class="text-red-700 text-xs group-hover:rotate-180 transition-transform duration-500">†</span>
+            <span class="text-xs font-typewriter tracking-[0.25em] text-neutral-300 group-hover:text-red-400">
+                友達
+            </span>
+        </button>
+        <div class="text-red-800/80 text-[10px] font-typewriter pr-1 pointer-events-none tracking-[0.3em]">
+            [ リンクを開く † ]
+        </div>
+    </div>
+
+    <!-- ================= friends ================= -->
+    <div id="friendsModal" class="hidden-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4" onclick="closeModalOnBackdrop(event)">
+        <div class="relative w-full max-w-lg bg-[#060606] border border-neutral-900 shadow-[0_0_70px_rgba(153,27,27,0.35)] p-6 md:p-8 text-neutral-300">
+            
+            <!-- Esquinas decorativas sangre seca -->
+            <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-red-800"></div>
+            <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-red-800"></div>
+            <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-red-800"></div>
+            <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-red-800"></div>
+
+            <!-- Cabecera del Modal -->
+            <div class="flex items-center justify-between border-b border-neutral-900 pb-3 mb-6">
+                <div class="flex items-center space-x-2.5">
+                    <span class="text-red-700 text-sm">⸸</span>
+                    <h2 class="font-gothic text-2xl md:text-3xl tracking-[0.18em] text-neutral-200">
+                        friends
+                    </h2>
+                </div>
+                <button onclick="closeModal()" class="text-neutral-500 hover:text-red-500 transition-colors text-xs font-typewriter tracking-widest px-2.5 py-1 border border-neutral-900 hover:border-red-900 bg-black">
+                    [x]
+                </button>
+            </div>
+
+            <!-- friends -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 justify-items-center max-h-[60vh] overflow-y-auto pr-1">
+                
+                <!--  1 -->
+                <a href="https://xat.me/iDaviiessx" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center space-y-2.5 text-center">
+                    <div class="w-[100px] h-[100px] border border-neutral-800 group-hover: bg-neutral-950 overflow-hidden relative transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(185,28,28,0.2)]">
+                        <img src="https://u.cubeupload.com/Kirigan/s1.png" alt="Nombre 1" class="w-[100px] h-[100px] object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300 no-drag">
+                    </div>
+                    <span class="font-typewriter text-[11px] tracking-[0.2em] text-neutral-400 group-hover:text-red-500 uppercase transition-colors">
+                        † Sivi
+                    </span>
+                </a>
+
+                <!--  2 -->
+                <a href="https://xat.me/Nyxess" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center space-y-2.5 text-center">
+                    <div class="w-[100px] h-[100px] border border-neutral-800 group-hover:none bg-neutral-950 overflow-hidden relative transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(185,28,28,0.2)]">
+                        <img src="https://u.cubeupload.com/Kirigan/n1.png" alt="Nombre 2" class="w-[100px] h-[100px] object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300 no-drag">
+                    </div>
+                    <span class="font-typewriter text-[11px] tracking-[0.2em] text-neutral-400 group-hover:text-red-500 uppercase transition-colors">
+                        † Nyx
+                    </span>
+                </a>
+
+                <!-- 3 -->
+                <a href="https://xat.me/Frieren" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center space-y-2.5 text-center">
+                    <div class="w-[100px] h-[100px] border border-neutral-800 group-hover:none bg-neutral-950 overflow-hidden relative transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(185,28,28,0.2)]">
+                        <img src="https://u.cubeupload.com/Kirigan/ce0d1.png" alt="Nombre 3" class="w-[100px] h-[100px] object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300 no-drag">
+                    </div>
+                    <span class="font-typewriter text-[11px] tracking-[0.2em] text-neutral-400 group-hover:text-red-500 uppercase transition-colors">
+                        † Drugs
+                    </span>
+                </a>
+
+                <!-- 4 -->
+                <a href="https://xat.me/Kiri" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center space-y-2.5 text-center">
+                    <div class="w-[100px] h-[100px] border border-neutral-800 group-hover:none bg-neutral-950 overflow-hidden relative transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(185,28,28,0.2)]">
+                        <img src="https://u.cubeupload.com/Kirigan/ki1.png" alt="Nombre 4" class="w-[100px] h-[100px] object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300 no-drag">
+                    </div>
+                    <span class="font-typewriter text-[11px] tracking-[0.2em] text-neutral-400 group-hover:text-red-500 uppercase transition-colors">
+                        † Kiri
+                    </span>
+                </a>
+
+               
+                <!-- 6 -->
+                <a href="https://xat.me/xChocolata" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center space-y-2.5 text-center">
+                    <div class="w-[100px] h-[100px] border border-neutral-800 group-hover:none bg-neutral-950 overflow-hidden relative transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(185,28,28,0.2)]">
+                        <img src="https://u.cubeupload.com/Kirigan/90dl1.png" alt="Nombre 6" class="w-[100px] h-[100px] object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300 no-drag">
+                    </div>
+                    <span class="font-typewriter text-[11px] tracking-[0.2em] text-neutral-400 group-hover:text-red-500 uppercase transition-colors">
+                        † Lala
+                    </span>
+                </a>
+
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="mt-6 pt-3 border-t border-neutral-900 flex justify-between items-center text-[9px] font-typewriter text-neutral-600 tracking-widest uppercase">
+                <span>⸸ forever emotionally deceased ⸸</span>
+                <span class="text-red-900">VOID // 000</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= comp central ================= -->
+    <div class="relative z-20 mt-auto mb-24 md:mb-20 text-center pointer-events-none select-none px-4">
+        
+        <!-- Etiqueta superior con cruces -->
+        <div class="flex items-center justify-center space-x-3 mb-1 opacity-85">
+            <span class="text-red-800 text-xs">†</span>
+            <span class="font-typewriter text-[10px] md:text-xs tracking-[0.45em] text-neutral-400 uppercase">
+                I am made of
+            </span>
+            <span class="text-red-800 text-xs">†</span>
+        </div>
+
+        <!-- Cursiva sangre superpuesta ("layse chan") -->
+        <div class="font-script text-4xl md:text-6xl text-red-700 -mb-5 md:-mb-7 relative z-10 blood-flicker">
+            things that
+        </div>
+
+        <!-- Título principal Serif Elegante ("FADING LIGHT") -->
+        <h1 class="font-cinzel text-4xl md:text-7xl font-semibold tracking-[0.32em] text-neutral-200 uppercase drop-shadow-[0_4px_30px_rgba(0,0,0,1)]">
+            no longer exist
+        </h1>
+
+        <!-- Línea divisoria central con cruz invertida -->
+        <div class="flex items-center justify-center space-x-3 mt-2.5 opacity-80">
+            <div class="w-16 md:w-32 h-[1px] bg-gradient-to-r from-transparent via-neutral-700 to-red-900"></div>
+            <span class="text-xs text-red-700">⸸</span>
+            <div class="w-16 md:w-32 h-[1px] bg-gradient-to-l from-transparent via-neutral-700 to-red-900"></div>
+        </div>
+    </div>
+
+    <!-- ESQUINA INFERIOR IZQUIERDA: CÓDIGO DE BARRAS Y LÍNEA VERTICAL -->
+    <div class="fixed bottom-8 left-8 z-20 pointer-events-none hidden md:flex items-end space-x-4">
+        <div class="flex flex-col items-center space-y-1">
+            <div class="w-[1px] h-12 bg-gradient-to-b from-transparent to-red-900"></div>
+            <span class="text-red-800 text-xs">†</span>
+        </div>
+        <div class="flex flex-col space-y-1">
+            <div class="w-20 h-6 barcode-lines opacity-55"></div>
+            <span class="text-[8px] font-typewriter tracking-[0.3em] text-neutral-600">VOID // 000</span>
+        </div>
+    </div>
+
+    <!-- ESQUINA INFERIOR DERECHA: MATRIZ DE PUNTOS Y MARCA HUD -->
+    <div class="fixed bottom-8 right-8 z-20 pointer-events-none hidden md:flex flex-col items-end space-y-2">
+        <span class="text-[9px] font-typewriter tracking-[0.3em] text-neutral-600 uppercase">
+            soul.exe corrupted
+        </span>
+        <div class="w-16 h-10 bg-dot-grid opacity-40"></div>
+        <div class="w-32 h-[1px] bg-gradient-to-l from-red-900/60 to-transparent"></div>
+    </div>
+
+    <!-- ================= REPRODUCTOR DE MÚSICA MINIMALISTA EMO-DARK ================= -->
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
+        <div class="bg-[#050505]/95 backdrop-blur-md border border-neutral-900 rounded-none px-1 py-2.5 flex items-center space-x-4 shadow-[0_0_40px_rgba(0,0,0,1)] hover:none transition-all relative">
+            <!-- Esquinas rojas del reproductor -->
+            <span class="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-red-800"></span>
+            <span class="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-red-800"></span>
+
+            <!-- Botón Play/Pause -->
+            <button onclick="toggleAudio()" id="playBtn" class="w-7 h-7 rounded-none bg-black hover:bg-red-950/50 border border-neutral-800 hover:border-red-800 flex items-center justify-center text-neutral-300 hover:text-red-500 text-xs transition-all active:scale-95">
+                <i class="fa-solid fa-play ml-0.5"></i>
+            </button>
+            
+            <!-- Info Pista -->
+            <div class="flex flex-col text-left">
+                <span class="text-[11px] font-typewriter tracking-widest text-neutral-200 uppercase font-bold">男と女</span>
+                <span class="text-[9px] font-garamond tracking-widest text-red-700 italic">BSD - OST</span>
+            </div>
+
+            <!-- Barra de Progreso Ultrafina -->
+            <div class="w-20 md:w-28 bg-neutral-900 h-[2px] overflow-hidden cursor-pointer" onclick="seekAudio(event)">
+                <div id="audioProgress" class="bg-red-800 h-full w-0 transition-all duration-150"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bgAudio" loop preload="metadata">
+        <source src="https://file.garden/Zd6Gl7mXyXjgTBxp/%E7%94%B7%E3%81%A8%E5%A5%B3.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // 1. CANVAS DE PARTÍCULAS DE CENIZA GRIS Y BRASAS ROJAS
+        const canvas = document.getElementById('lightCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = Array.from({ length: 85 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            radius: Math.random() * 1.8 + 0.4,
+            speedY: Math.random() * 0.55 + 0.15,
+            speedX: Math.random() * 0.4 - 0.2,
+            opacity: Math.random() * 0.55 + 0.15,
+            isRed: Math.random() < 0.38
+        }));
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.isRed 
+                    ? `rgba(185, 28, 28, ${p.opacity})` 
+                    : `rgba(163, 163, 163, ${p.opacity})`;
+                ctx.fill();
+
+                p.y += p.speedY * 0.75;
+                p.x += Math.sin(p.y * 0.01) * 0.35 + p.speedX;
+
+                if (p.y > canvas.height) {
+                    p.y = -5;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x > canvas.width) p.x = 0;
+                if (p.x < 0) p.x = canvas.width;
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 2. CONTROLES DE REPRODUCTOR DE MÚSICA
+        const audio = document.getElementById('bgAudio');
+        const playBtn = document.getElementById('playBtn');
+        const progress = document.getElementById('audioProgress');
+
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                }).catch(() => {});
+            } else {
+                audio.pause();
+                playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
+            }
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percentage = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = `${percentage}%`;
+            }
+        });
+
+        function seekAudio(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        }
+
+        // 3. PROTECCIÓN Y BLOQUEO DE IMÁGENES
+        window.addEventListener('load', () => {
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.tagName === 'IMG' || e.target.closest('img')) {
+                    e.preventDefault();
+                }
+            });
+
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.tagName === 'IMG' || e.target.closest('img')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // 4. CONTROL DE VENTANA EMERGENTE (MODAL)
+        const modal = document.getElementById('friendsModal');
+
+        function openModal() {
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('visible-modal');
+        }
+
+        function closeModal() {
+            modal.classList.remove('visible-modal');
+            modal.classList.add('hidden-modal');
+        }
+
+        function closeModalOnBackdrop(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('visible-modal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
